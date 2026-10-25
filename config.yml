@@ -1,0 +1,9 @@
+# Publii Auto LLM translation config file
+
+projectPath:
+    orginal:
+    translated:
+language:
+    orginal: Polish
+    wanted: English
+model: gemma3:4b
