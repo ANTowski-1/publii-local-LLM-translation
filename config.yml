@@ -2,8 +2,8 @@
 
 projectPath:
     orginal:
-    translated:
+    target:
 language:
     orginal: Polish
-    wanted: English
+    target: English
 model: gemma3:4b
