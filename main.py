@@ -1,6 +1,6 @@
 from ollama import chat, ChatResponse
 
-message = 'Translate this html from polish to english, while preserving the formating, and style and the vibe of my writing. ' + '<h1>"Co tu się dzieje?"</h1><br><p>"Zimno mi!"</p>'
+message = 'Translate this html from polish to english, while preserving the formating, and style and the vibe of my writing. ' + '<h1>"Paweł Jumper!"</h1><br><p>"To polska legenda!"</p>'
 
 response: ChatResponse = chat(
     model='gemma3:4b',
