@@ -6,13 +6,14 @@ from time import sleep
 
 
 def pushTranslated(transData, id):
-    targCursor.execute('SELECT * FROM posts WHERE id is ?', str(id))
-    if [list(row) for row in targCursor.fetchall()] == "[]":
+    targCursor.execute('SELECT * FROM posts WHERE id is ?', (str(id),))
+    if [list(row) for row in targCursor.fetchall()] == []:
         targCursor.execute('INSERT INTO posts VALUES (?,?,?,?,?,?,?,?,?,?)', [str(transData[0][0]), str(transData[0][1]), str(transData[0][2]), str(transData[0][3]), \
                     str(transData[0][4]), str(transData[0][5]), str(transData[0][6]), str(transData[0][7]), str(transData[0][8]), str(transData[0][9])])
     else:
         targCursor.execute('UPDATE posts SET text = ?, modified_at = ?, status = ? WHERE id = ?', [str(transData[0][4]), str(transData[0][7]), str(transData[0][8]), str(id)])
-        print("Puted the query into the DB")
+    targDB.commit()
+    if args.debug == True: print("Puted the query into the DB")
     return
 
 
@@ -68,8 +69,7 @@ while i < postsNum:
  Do not include the orginal data, and do not add text formating stating what file type it is — response should only contain plain translated part.\
  If you are greeted with a longer JSON, only translate the "content" parts, but output the whole JSON string.' \
         + str(orgRecord[0][4])
-        if args.debug == True:
-            print("Promp: "+message)
+        if args.debug == True: print("Promp: "+message)
         
         response: ChatResponse = chat(  
             model=model,
@@ -90,6 +90,9 @@ while i < postsNum:
         targRecord[0][4] = translation
         pushTranslated(targRecord, i)
 
+
+targDB.commit()
+if args.debug == True: print("Commited changes to the DB")
 print("Everything translated!")
 print("Terminating program!")
 
