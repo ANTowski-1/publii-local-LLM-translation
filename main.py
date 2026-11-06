@@ -7,11 +7,13 @@ from time import sleep
 
 def pushTranslated(transData, id):
     targCursor.execute('SELECT * FROM posts WHERE id is ?', (str(id),))
-    if [list(row) for row in targCursor.fetchall()] == []:
-        targCursor.execute('INSERT INTO posts VALUES (?,?,?,?,?,?,?,?,?,?)', [str(transData[0][0]), str(transData[0][1]), str(transData[0][2]), str(transData[0][3]), \
-                    str(transData[0][4]), str(transData[0][5]), str(transData[0][6]), str(transData[0][7]), str(transData[0][8]), str(transData[0][9])])
-    else:
-        targCursor.execute('UPDATE posts SET text = ?, modified_at = ?, status = ? WHERE id = ?', [str(transData[0][4]), str(transData[0][7]), str(transData[0][8]), str(id)])
+    if True: #[list(row) for row in targCursor.fetchall()] == []:
+        targCursor.execute('INSERT INTO posts VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET authors=excluded.authors, text=excluded.text, \
+                    featured_image_id=excluded.featured_image_id, modified_at=excluded.modified_at, status=excluded.status, template=excluded.template',\
+                    [str(transData[0][0]), str(transData[0][1]), str(transData[0][2]), str(transData[0][3]), str(transData[0][4]), str(transData[0][5]), \
+                    str(transData[0][6]), str(transData[0][7]), str(transData[0][8]), str(transData[0][9])])
+    #else:
+        #targCursor.execute('UPDATE posts SET text = ?, modified_at = ?, status = ? WHERE id = ?', [str(transData[0][4]), str(transData[0][7]), str(transData[0][8]), str(id)])
     targDB.commit()
     if args.debug == True: print("Puted the query into the DB")
     return
@@ -87,6 +89,12 @@ while i < postsNum:
         translation = str(response['message']['content'])
         cashedRecord = orgRecord
         targRecord = orgRecord
+        cashedCursor.execute('INSERT INTO posts VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT (id) DO UPDATE SET title=excluded.title, authors=excluded.authors, \
+            slug=excluded.slug, text=excluded.text, featured_image_id=excluded.featured_image_id, created_at=excluded.created_at, \
+            modified_at=excluded.modified_at, status=excluded.status, template=excluded.template', [str(orgRecord[0][0]), str(orgRecord[0][1]), \
+            str(orgRecord[0][2]), str(orgRecord[0][3]), str(orgRecord[0][4]), str(orgRecord[0][5]), str(orgRecord[0][6]), str(orgRecord[0][7]), \
+            str(orgRecord[0][8]), str(orgRecord[0][9])])
+        cashedDB.commit()
         targRecord[0][4] = translation
         pushTranslated(targRecord, i)
 
