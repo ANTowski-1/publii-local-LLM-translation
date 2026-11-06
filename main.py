@@ -23,6 +23,7 @@ parser = argparse.ArgumentParser(description="Automatily translate Publii-made w
 parser.add_argument('-c', '--config', help='Select path to your YAML configuration file.', default="config.yml", type=str)
 parser.add_argument('-d', '--DB', help='Select path to the programs DB.', default="cashedDB.sqlite", type=str)
 parser.add_argument('--debug', help='Enable debuging mode.', action='store_true')
+parser.add_argument("-f", "--force", help="Include to forse translation even when cashed record maches.", action="store_true")
 args = parser.parse_args()
 
 try:
@@ -64,13 +65,22 @@ while i < postsNum:
     orgRecord = [list(row) for row in orgCursor.fetchall()]
     cashedCursor.execute('SELECT * FROM posts WHERE id is ?', str(i))
     cashedRecord = [list(row) for row in cashedCursor.fetchall()]
-    if cashedRecord != orgRecord:
-
-        message = 'Translate this html from ' + orgLang + ' to ' + targLang + ' , while preserving the, style and the vibe of my writing.\
- DO NOT CHANGE ANY OF THE HTML FORMATING! Do not add any things apart from the raw translated data.\
- Do not include the orginal data, and do not add text formating stating what file type it is — response should only contain plain translated part.\
- If you are greeted with a longer JSON, only translate the "content" parts, but output the whole JSON string.' \
-        + str(orgRecord[0][4])
+    if cashedRecord != orgRecord or args.force == True:
+        message = "You are a translation engine. Translate the input from " + orgLang + " to " + targLang + ".\
+            Output rules:\
+            1. Your entire response is the translated input and nothing else. It starts with the first character of the translated text and ends with its last character.\
+            2. Never wrap the output in code fences, triple quotes, or any label such as 'JSON' or 'HTML'. Never add commentary, never include the original text.\
+            3. The output format is identical to the input format. HTML in, HTML out. JSON in, JSON out.\
+            4. For HTML: translate only human-readable text and alt/title attribute values. Keep all tags, attributes, class names, IDs, URLs, scripts, and whitespace exactly as they are.\
+            5. For JSON: keep the structure, keys, numbers, booleans, and URLs unchanged. Translate only the values of human-readable fields, such as content, title, excerpt, description, and alt. Output the complete JSON object.\
+            6. Preserve placeholders and entities exactly as written, for example %s, {{variable}}, or &amp;.\
+            7. Match the tone, style, and vibe of the original text.\
+            INPUT: " + str(orgRecord[0][4])
+#         message = 'Translate this html from ' + orgLang + ' to ' + targLang + ' , while preserving the, style and the vibe of my writing.\
+#  DO NOT CHANGE ANY OF THE HTML FORMATING! Do not add any things apart from the raw translated data.\
+#  Do not include the orginal data, and do not add text formating stating what file type it is — response should only contain plain translated part.\
+#  If you are greeted with a longer JSON, only translate the "content" parts, but output the whole JSON string.' \
+#         + str(orgRecord[0][4])
         if args.debug == True: print("Promp: "+message)
         
         response: ChatResponse = chat(  
